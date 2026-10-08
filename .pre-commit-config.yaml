@@ -1,0 +1,47 @@
+# Contrôles lancés avant chaque commit (par le hook global) et en CI.
+# Mettre à jour les versions : pre-commit autoupdate
+repos:
+  # Contrôles génériques : syntaxe, hygiène des fichiers
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # Secrets : redondant avec le hook global sur le laptop, utile en CI
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 2ca41cc1372d1e939a6a879f18cdc19fc1cac1ce  # frozen: v8.30.0
+    hooks:
+      - id: gitleaks
+
+  # Messages de commit : Conventional Commits (étape commit-msg)
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: 3db014c16a9d31997ab8c07a4d61fcce936c8f0d  # frozen: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        args: [--verbose, feat, fix, refactor, docs, ci, build, chore, test, perf, revert]
+
+  # Packer : utilise le binaire installé sur la machine
+  - repo: local
+    hooks:
+      - id: packer-fmt
+        name: packer fmt
+        entry: packer fmt -check -diff .
+        language: system
+        files: \.pkr\.hcl$
+        pass_filenames: false
+      - id: packer-validate
+        name: packer validate (syntaxe)
+        entry: packer validate -syntax-only .
+        language: system
+        files: \.(pkr\.hcl|pkrtpl)$
+        pass_filenames: false

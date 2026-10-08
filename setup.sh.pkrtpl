@@ -1,0 +1,31 @@
+#!/bin/bash
+set -ex
+
+# ── Vérifier que qemu-guest-agent est bien démarré ──
+sudo systemctl start qemu-guest-agent
+
+# ── Labéliser la partition root ──
+sudo e2label /dev/sda1 root
+
+# ── Nettoyage du password temporaire de build ──
+sudo passwd -d ${username}
+
+# ── Suppression du sudo NOPASSWD ──
+sudo rm -f /etc/sudoers.d/${username}
+
+# ── Préparation cloud-init pour le premier boot ──
+sudo rm -f /etc/cloud/cloud.cfg.d/99-packer-build.cfg
+sudo cloud-init clean
+
+# ── Nettoyage général ──
+sudo apt-get clean
+sudo rm -rf /var/lib/apt/lists/*
+sudo truncate -s 0 /etc/machine-id
+sudo rm -f /var/lib/dbus/machine-id
+sudo rm -f /home/${username}/.ssh/authorized_keys
+sudo rm -rf /root/.ssh/
+sudo rm -rf /tmp/*
+sudo find /var/log -type f -exec truncate -s 0 {} +
+sudo dd if=/dev/zero of=/zerofile bs=1M || true
+sudo rm -f /zerofile
+sudo sync

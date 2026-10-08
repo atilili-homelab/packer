@@ -1,0 +1,5 @@
+# Cache de nix-direnv (liens vers le /nix/store de la machine locale)
+.direnv/
+
+# Cache des ISO et plugins téléchargés par Packer
+packer_cache/
