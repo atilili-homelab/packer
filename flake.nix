@@ -19,6 +19,7 @@
         packer # fmt et validate le code
         pre-commit
         gitleaks
+        forgejo-runner
       ];
   in {
     devShells = forAllSystems (pkgs: {
