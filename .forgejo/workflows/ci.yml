@@ -1,6 +1,6 @@
 on: [push, pull_request]
 jobs:
-  lint:
+  pre-commit:
     runs-on: nix
     env:
       NIX_CONFIG: "experimental-features = nix-command flakes"

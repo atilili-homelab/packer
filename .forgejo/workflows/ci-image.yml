@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [main]
+    paths:
+      - flake.nix
+      - flake.lock
+jobs:
+  build-packer-ci:
+    runs-on: nix
+    env:
+      NIX_CONFIG: "experimental-features = nix-command flakes"
+    steps:
+      - run: nix profile install nixpkgs#nodejs
+      - uses: actions/checkout@v6
+      - run: |
+          nix build '.#ci-image'
+          nix develop -c skopeo copy --dest-creds "yoann:${{ secrets.CI_PACKER_TOKEN }}" \
+            docker-archive:result \
+            docker://forge.macopla.com/homelab/packer/packer-ci:latest
