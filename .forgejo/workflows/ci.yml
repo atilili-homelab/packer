@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Gitleaks scan
+        run: gitleaks git --redact --verbose --log-opts="origin/main..HEAD"
       - name: Cache pre-commit
         uses: actions/cache@v4
         with:
