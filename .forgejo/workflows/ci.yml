@@ -1,10 +1,20 @@
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [main]
+
+name: Test
+
 jobs:
   pre-commit:
-    runs-on: nix
-    env:
-      NIX_CONFIG: "experimental-features = nix-command flakes"
+    name: Pre-commit
+    runs-on: docker
+    container:
+      image: forge.macopla.com/homelab/packer/packer-ci:latest
+      credentials:
+        username: yoann
+        password: ${{ secrets.CI_PACKER_PULL_TOKEN }}
     steps:
-      - run: nix profile install nixpkgs#nodejs
-      - uses: actions/checkout@v6
-      - run: nix develop -c pre-commit run --all-files --show-diff-on-failure
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure

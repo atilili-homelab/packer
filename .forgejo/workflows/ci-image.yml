@@ -7,16 +7,26 @@ on:
       - flake.lock
       - .forgejo/workflows/ci-image.yml
 
+name: Build CI-Container
+
 jobs:
   build-packer-ci:
+    name: Build Packer CI Container
     runs-on: nix
     env:
       NIX_CONFIG: "experimental-features = nix-command flakes"
     steps:
-      - run: nix profile install nixpkgs#nodejs
-      - uses: actions/checkout@v6
-      - run: |
-          nix build '.#ci-image'
-          nix develop -c skopeo --insecure-policy copy --dest-creds "yoann:${{ secrets.CI_PACKER_TOKEN }}" \
-            docker-archive:result \
-            docker://forge.macopla.com/homelab/packer/packer-ci:latest
+      - name: Install nodejs
+        run: nix profile install nixpkgs#nodejs
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build image
+        run: nix build '.#ci-image'
+      - name: Push image
+        run: |
+          for tag in $FORGEJO_SHA latest; do
+            nix develop -c skopeo --insecure-policy \
+              copy --dest-creds "yoann:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
+              docker-archive:result \
+              docker://forge.macopla.com/homelab/packer/packer-ci:$tag
+          done
