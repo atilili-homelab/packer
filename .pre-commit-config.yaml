@@ -1,4 +1,7 @@
 # Contrôles lancés avant chaque commit (par le hook global) et en CI.
+
+default_stages: [pre-commit]
+
 repos:
   # Contrôles génériques : syntaxe, hygiène des fichiers
   - repo: https://github.com/pre-commit/pre-commit-hooks
