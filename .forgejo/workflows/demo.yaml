@@ -4,3 +4,5 @@ jobs:
     runs-on: docker
     steps:
       - run: echo All good!
+      - uses: actions/checkout@v6
+      - run: ls -la
