@@ -1,0 +1,10 @@
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: nix
+    env:
+      NIX_CONFIG: "experimental-features = nix-command flakes"
+    steps:
+      - run: nix profile install nixpkgs#nodejs
+      - uses: actions/checkout@v6
+      - run: nix develop -c pre-commit run --all-files --show-diff-on-failure

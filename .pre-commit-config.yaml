@@ -1,9 +1,8 @@
 # Contrôles lancés avant chaque commit (par le hook global) et en CI.
-# Mettre à jour les versions : pre-commit autoupdate
 repos:
   # Contrôles génériques : syntaxe, hygiène des fichiers
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
       - id: check-yaml
       - id: check-json
@@ -17,20 +16,38 @@ repos:
       - id: mixed-line-ending
         args: [--fix=lf]
 
-  # Secrets : redondant avec le hook global sur le laptop, utile en CI
   - repo: https://github.com/gitleaks/gitleaks
-    rev: 2ca41cc1372d1e939a6a879f18cdc19fc1cac1ce  # frozen: v8.30.0
+    rev: 2ca41cc1372d1e939a6a879f18cdc19fc1cac1ce # frozen: v8.30.0
     hooks:
       - id: gitleaks
 
-  # Messages de commit : Conventional Commits (étape commit-msg)
+  # Workflows Forgejo Actions : validation de la syntaxe
+  - repo: https://code.forgejo.org/forgejo/runner
+    rev: df6b843fb929bb04b933b09c6bf208774d42480b # frozen: v13.2.0
+    hooks:
+      - id: forgejo-runner-validate
+
+  # Messages de commit : Conventional Commits
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: 3db014c16a9d31997ab8c07a4d61fcce936c8f0d  # frozen: v4.4.0
+    rev: 3db014c16a9d31997ab8c07a4d61fcce936c8f0d # frozen: v4.4.0
     hooks:
       - id: conventional-pre-commit
-        args: [--verbose, feat, fix, refactor, docs, ci, build, chore, test, perf, revert]
+        args:
+          [
+            --verbose,
+            feat,
+            fix,
+            refactor,
+            docs,
+            ci,
+            build,
+            chore,
+            test,
+            perf,
+            revert,
+          ]
 
-  # Packer : utilise le binaire installé sur la machine
+  # Packer
   - repo: local
     hooks:
       - id: packer-fmt
