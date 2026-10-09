@@ -14,6 +14,6 @@ jobs:
       - uses: actions/checkout@v6
       - run: |
           nix build '.#ci-image'
-          nix develop -c skopeo copy --dest-creds "yoann:${{ secrets.CI_PACKER_TOKEN }}" \
+          nix develop -c skopeo --insecure-policy copy --dest-creds "yoann:${{ secrets.CI_PACKER_TOKEN }}" \
             docker-archive:result \
             docker://forge.macopla.com/homelab/packer/packer-ci:latest
