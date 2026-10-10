@@ -25,12 +25,6 @@ repos:
       - id: gitleaks-system
         pass_filenames: false
 
-  # Workflows Forgejo Actions : validation de la syntaxe
-  - repo: https://code.forgejo.org/forgejo/runner
-    rev: df6b843fb929bb04b933b09c6bf208774d42480b # frozen: v13.2.0
-    hooks:
-      - id: forgejo-runner-validate
-
   # Messages de commit : Conventional Commits
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: 3db014c16a9d31997ab8c07a4d61fcce936c8f0d # frozen: v4.4.0
@@ -51,7 +45,6 @@ repos:
             revert,
           ]
 
-  # Packer
   - repo: local
     hooks:
       - id: packer-fmt
@@ -66,3 +59,10 @@ repos:
         language: system
         files: \.(pkr\.hcl|pkrtpl)$
         pass_filenames: false
+      - id: forgejo-runner-validate
+        name: Validate Forgejo Actions files
+        entry: forgejo-runner validate --directory .
+        language: system
+        pass_filenames: false
+        files: (?:(?:^|/)action|^\.(?:forgejo|github|gitea)/workflows/[^/\n]+)\.ya?ml$
+        types: [yaml]
