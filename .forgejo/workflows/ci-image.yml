@@ -27,7 +27,7 @@ jobs:
           echo "hash=$hash" >> "$FORGEJO_OUTPUT"
           if nix develop -c skopeo --insecure-policy inspect \
               --creds "yoann:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
-              docker://forge.macopla.com/homelab/packer/packer-ci:$hash > /dev/null 2>$1; then
+              docker://forge.macopla.com/homelab/packer/packer-ci:$hash > /dev/null 2>&1; then
             echo "exists=true" >> "$FORGEJO_OUTPUT"
           fi
       - name: Build image
