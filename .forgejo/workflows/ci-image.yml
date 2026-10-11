@@ -20,11 +20,23 @@ jobs:
         run: nix profile install nixpkgs#nodejs
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check if image already exists
+        id: check
+        run: |
+          hash=$(nix eval --raw '.#ci-image.outPath' | cut -d/ -f4 | cut -d- -f1)
+          echo "hash=$hash" >> "$FORGEJO_OUTPUT"
+          if nix develop -c skopeo --insecure-policy inspect \
+              --creds "yoann:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
+              docker://forge.macopla.com/homelab/packer/packer-ci:$hash > /dev/null 2>$1; then
+            echo "exists=true" >> "$FORGEJO_OUTPUT"
+          fi
       - name: Build image
+        if: steps.check.outputs.exists != 'true'
         run: nix build '.#ci-image'
       - name: Push image
+        if: steps.check.outputs.exists != 'true'
         run: |
-          for tag in $FORGEJO_SHA latest; do
+          for tag in ${{ steps.check.outputs.hash }} latest; do
             nix develop -c skopeo --insecure-policy \
               copy --dest-creds "yoann:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
               docker-archive:result \
