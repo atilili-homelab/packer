@@ -11,7 +11,7 @@ jobs:
     container:
       image: forge.macopla.com/homelab/packer/packer-ci:latest@sha256:756cc7e6ddea20d99911a6f6cff0c3c5f167db164ad6136dc27ad3d421764619
       credentials:
-        username: yoann
+        username: ci-bot
         password: ${{ secrets.CI_PACKER_PULL_TOKEN }}
     steps:
       - name: Checkout

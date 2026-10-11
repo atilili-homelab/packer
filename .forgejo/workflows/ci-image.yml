@@ -25,8 +25,9 @@ jobs:
         run: |
           hash=$(nix eval --raw '.#ci-image.outPath' | cut -d/ -f4 | cut -d- -f1)
           echo "hash=$hash" >> "$FORGEJO_OUTPUT"
-          if nix develop -c skopeo --insecure-policy inspect \
-              --creds "yoann:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
+          if nix shell --inputs-from . nixpkgs#skopeo -c \
+              skopeo --insecure-policy inspect \
+              --creds "ci-bot:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
               docker://forge.macopla.com/homelab/packer/packer-ci:$hash > /dev/null 2>&1; then
             echo "exists=true" >> "$FORGEJO_OUTPUT"
           fi
@@ -37,8 +38,9 @@ jobs:
         if: steps.check.outputs.exists != 'true'
         run: |
           for tag in ${{ steps.check.outputs.hash }} latest; do
-            nix develop -c skopeo --insecure-policy \
-              copy --dest-creds "yoann:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
+            nix shell --inputs-from . nixpkgs#skopeo -c \
+              skopeo --insecure-policy \
+              copy --dest-creds "ci-bot:${{ secrets.CI_PACKER_PUSH_TOKEN }}" \
               docker-archive:result \
               docker://forge.macopla.com/homelab/packer/packer-ci:$tag
           done
