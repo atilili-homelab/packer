@@ -17,7 +17,7 @@ jobs:
       NIX_CONFIG: "experimental-features = nix-command flakes"
     steps:
       - name: Install nodejs
-        run: nix profile install nixpkgs#nodejs
+        run: nix profile add nixpkgs#nodejs-slim
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check if image already exists
