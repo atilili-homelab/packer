@@ -29,6 +29,7 @@
           ++ [
             pkgs.openbao # connexion AppRole dans .envrc
             pkgs.skopeo # publication de l'image de CI
+            pkgs.ansible # utilisation de mes collections
           ];
       };
     });
