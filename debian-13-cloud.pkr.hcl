@@ -4,8 +4,13 @@ packer {
       version = "= 1.2.3"
       source  = "github.com/hashicorp/proxmox"
     }
+    ansible = {
+      version = "= 1.1.6"
+      source  = "github.com/hashicorp/ansible"
+    }
   }
 }
+
 
 # ── Secrets lus dans OpenBao (VAULT_ADDR et VAULT_TOKEN fournis par .envrc) ──
 local "proxmox_token" {
@@ -38,9 +43,10 @@ source "proxmox-iso" "debian-13" {
   insecure_skip_tls_verify = var.skip_tls_verify
   vm_name                  = var.vm_name
   template_description = templatefile("${path.root}/template-description.md", {
-    packer_version = packer.version
-    build_date     = formatdate("DD-MM-YYYY", timestamp())
-    packages       = var.packages
+    packer_version     = packer.version
+    build_date         = formatdate("DD-MM-YYYY", timestamp())
+    packages           = var.packages
+    collection_version = yamldecode(file("${path.root}/requirements.yml")).collections[0].version
   })
 
   # ── Onglet "OS" ──
@@ -142,6 +148,12 @@ build {
       disk_size    = local.disk.disk_size
       format       = local.disk.format
     }
+  }
+
+  provisioner "ansible" {
+    playbook_file = "${path.root}/golden.yml"
+    galaxy_file   = "${path.root}/requirements.yml"
+    user          = var.username
   }
 
   provisioner "shell" {

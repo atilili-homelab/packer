@@ -1,11 +1,15 @@
-# Debian 13 Cloud-Init Template by Atilili
+#  Debian 13 Cloud-Init Template by Atilili
 
 **Build Info:**
+
 - Packer Version: ${packer_version}
 - Build Date: ${build_date}
 
-**Paquets Installés :**
-${packages}
+**Contenu de l'image :**
+
+- Installé par le preseed : ${packages}
+- Socle appliqué par Ansible, collection `homelab.base` ${collection_version} :
+  paquets de base, chrony, Docker
 
 ---
 
@@ -19,6 +23,9 @@ ${packages}
 ---
 
 ### 🐛 Troubleshooting
+
 - **VM ne boot pas:** Vérifier les logs dans Console (Proxmox)
-- **SSH refuse connexion:** Vérifier que cloud-init a terminé : `cloud-init status`
-- **Disque pas resize:** Vérifier logs : `cat /var/log/cloud-init.log | grep -i grow`
+- **SSH refuse connexion:** Vérifier que cloud-init a terminé :
+  `cloud-init status`
+- **Disque pas resize:** Vérifier logs :
+  `cat /var/log/cloud-init.log | grep -i grow`
