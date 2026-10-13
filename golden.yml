@@ -1,0 +1,17 @@
+- name: Golden image
+  hosts: all
+  become: true
+  tasks:
+    - name: Paquets de base
+      ansible.builtin.include_role:
+        name: homelab.base.common
+        tasks_from: packages
+
+    - name: Chrony
+      ansible.builtin.include_role:
+        name: homelab.base.common
+        tasks_from: time
+
+    - name: Docker
+      ansible.builtin.include_role:
+        name: homelab.base.docker

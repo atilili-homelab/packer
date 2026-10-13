@@ -1,0 +1,4 @@
+collections:
+  - name: ssh://git@forge.macopla.com:2222/homelab/ansible.git
+    type: git
+    version: v1.0.0
