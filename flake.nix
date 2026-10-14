@@ -13,8 +13,8 @@
           config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) ["packer"];
         }));
 
-    # Outils des contrôles, communs au devShell et à l'image de CI
-    checkTools = pkgs:
+    # Outils communs au devShell et à l'image de CI
+    Tools = pkgs:
       with pkgs; [
         packer # fmt et validate le code
         pre-commit
@@ -27,7 +27,7 @@
     devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
         packages =
-          checkTools pkgs
+          Tools pkgs
           ++ [
             pkgs.skopeo # publication de l'image de CI
           ];
@@ -39,20 +39,21 @@
       ci-image = pkgs.dockerTools.buildLayeredImage {
         name = "packer-ci";
         contents =
-          checkTools pkgs
+          Tools pkgs
           ++ (with pkgs; [
             bashInteractive
+            cacert
             coreutils
+            dockerTools.fakeNss
             findutils
+            gitMinimal
             gnugrep
             gnused
             gnutar
             gzip
-            which
-            gitMinimal
             nodejs
-            cacert
-            dockerTools.fakeNss
+            openssh
+            which
           ]);
         extraCommands = ''
           mkdir -p tmp root
@@ -63,6 +64,7 @@
             "PATH=/bin"
             "HOME=/root"
             "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
+            "LANG=C.UTF-8"
           ];
           WorkingDir = "/root";
         };
