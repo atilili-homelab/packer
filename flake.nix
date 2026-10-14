@@ -20,6 +20,8 @@
         pre-commit
         gitleaks
         forgejo-runner
+        ansible # utilisation de mes collections
+        openbao # connexion AppRole dans .envrc
       ];
   in {
     devShells = forAllSystems (pkgs: {
@@ -27,9 +29,7 @@
         packages =
           checkTools pkgs
           ++ [
-            pkgs.openbao # connexion AppRole dans .envrc
             pkgs.skopeo # publication de l'image de CI
-            pkgs.ansible # utilisation de mes collections
           ];
       };
     });
