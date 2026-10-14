@@ -8,15 +8,16 @@ name: Build templates
 jobs:
   build:
     name: Build Proxmox templates
-    runs-on: nix
+    runs-on: docker
+    container:
+      image: forge.macopla.com/homelab/packer/packer-ci:latest
+      credentials:
+        username: ci-bot
+        password: ${{ secrets.CI_PACKER_PULL_TOKEN }}
     env:
-      NIX_CONFIG: "experimental-features = nix-command flakes"
       VAULT_ADDR: http://sati.macopla.home:8200
       BAO_ADDR: http://sati.macopla.home:8200
     steps:
-      - name: Install nodejs
-        run: nix profile add nixpkgs#nodejs-slim
-
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -32,8 +33,6 @@ jobs:
           ROLE_ID: ${{ secrets.CI_PACKER_ROLE_ID }}
           SECRET_ID: ${{ secrets.CI_PACKER_SECRET_ID }}
         run: |
-          nix develop -c bash -c '
-            export VAULT_TOKEN="$(echo "$SECRET_ID" | bao write -field=token auth/approle/login role_id="$ROLE_ID" secret_id=-)"
-            packer init .
-            packer build -force -var packer_ip=mouse.macopla.home .
-          '
+          export VAULT_TOKEN="$(echo "$SECRET_ID" | bao write -field=token auth/approle/login role_id="$ROLE_ID" secret_id=-)"
+          packer init .
+          packer build -force -var packer_ip=mouse.macopla.home .
