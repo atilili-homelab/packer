@@ -35,4 +35,5 @@ jobs:
         run: |
           export VAULT_TOKEN="$(echo "$SECRET_ID" | bao write -field=token auth/approle/login role_id="$ROLE_ID" secret_id=-)"
           packer init .
+          packer validate -var packer_ip=mouse.macopla.home .
           packer build -force -var packer_ip=mouse.macopla.home .
