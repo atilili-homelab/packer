@@ -6,6 +6,10 @@ Packer sur mon cluster Proxmox VE de trois nœuds.
 Ces templates sont la première partie de mon homelab : OpenTofu les clone pour
 créer les VM, puis Ansible les configure plus finement.
 
+Le socle commun à toutes les VM (paquets de base, chrony, Docker) est déjà dans
+l'image. Il est posé pendant le build par les mêmes rôles Ansible que ceux qui
+configurent ensuite les machines, pour qu'il ne soit écrit qu'à un seul endroit.
+
 ## Ce que fait le build
 
 Un seul `packer build` produit un template par nœud, en parallèle :
@@ -20,13 +24,24 @@ Pour chaque nœud :
 
 1. **Installation automatique** de Debian depuis l'ISO, pilotée par un fichier
    _preseed_ servi par Packer en HTTP (`preseed.cfg.pkrtpl`).
-2. **Préparation** par `setup.sh.pkrtpl` : agent QEMU activé, mot de passe
+2. **Socle commun** appliqué par Ansible : Packer installe ma collection
+   `homelab.base` à la version fixée dans `requirements.yml`, puis lance
+   `golden.yml`, qui applique les paquets de base et chrony du rôle `common`, et
+   le rôle `docker`.
+3. **Préparation** par `setup.sh.pkrtpl` : agent QEMU activé, mot de passe
    temporaire et sudo sans mot de passe supprimés, cloud-init remis à zéro,
    `machine-id` et clés SSH effacés, journaux vidés, espace libre mis à zéro
    pour un template plus compact.
-3. **Conversion en template** Proxmox, avec une description générée
-   (`template-description.md`) décrivant la version de Packer, la date du build
-   et les paquets installés.
+4. **Conversion en template** Proxmox, avec une description générée
+   (`template-description.md`) décrivant la version de Packer, la date du build,
+   les paquets installés par le preseed et la version de la collection.
+
+Les comptes, le durcissement SSH et le swap ne sont pas dans l'image : ils
+dépendent de la machine ou changent trop souvent, et restent appliqués par
+Ansible sur chaque VM.
+
+Les templates sont reconstruits automatiquement par la CI/CD le premier de
+chaque mois, pour que les VM créées partent d'un système à jour.
 
 ## Prérequis
 
@@ -34,8 +49,9 @@ Pour chaque nœud :
 - **rbw** (client Bitwarden CLI) déverrouillé : il fournit les identifiants
   AppRole d'OpenBao.
 - Un accès réseau à **OpenBao** et à l'**API Proxmox**.
+- Un accès en lecture au dépôt de la collection Ansible, par clé SSH.
 
-Les outils (packer, pre-commit, gitleaks, client OpenBao) ne sont pas à
+Les outils (packer, ansible, pre-commit, gitleaks, client OpenBao) ne sont pas à
 installer : ils sont fournis par le `flake.nix`, en versions figées par
 `flake.lock`.
 
@@ -45,15 +61,15 @@ Aucun secret n'est stocké dans ce dépôt, ni sur disque.
 
 - Le **token API Proxmox** et le **mot de passe temporaire du build** sont lus
   dans OpenBao grâce à la fonction `vault()` de Packer.
-- À l'entrée dans le dossier, `.envrc` se connecte à OpenBao avec l'AppRole
-  `packer` (identifiants lus dans Bitwarden via rbw) et exporte un token valable
-  une heure, limité à la lecture de `secret/data/packer/*`.
+- En local, à l'entrée dans le dossier, `.envrc` se connecte à OpenBao avec
+  l'AppRole `packer` (identifiants lus dans Bitwarden via rbw) et exporte un
+  token valable une heure, limité à la lecture de `secret/data/packer/*`.
 
 ## Utilisation
 
 ```bash
 direnv allow            # une seule fois : charge l'environnement et le token OpenBao
-packer init .           # télécharge le plugin Proxmox (version figée)
+packer init .           # télécharge les plugins Proxmox et Ansible (versions figées)
 packer validate .       # vérifie que la configuration est bonne
 packer build .          # build sur les trois nœuds (-only pour cibler)
 packer build -force .   # pour forcer la recréation des templates
@@ -70,6 +86,8 @@ dans `debian-13.auto.pkrvars.hcl`.
 | `variables.pkr.hcl`          | Déclaration des variables                            |
 | `debian-13.auto.pkrvars.hcl` | Valeurs des variables (non secrètes)                 |
 | `preseed.cfg.pkrtpl`         | Réponses de l'installateur Debian                    |
+| `golden.yml`                 | Playbook du socle commun, lancé pendant le build     |
+| `requirements.yml`           | Collection Ansible utilisée, version figée           |
 | `setup.sh.pkrtpl`            | Préparation de la VM avant conversion en template    |
 | `template-description.md`    | Modèle de la description affichée dans Proxmox       |
 | `flake.nix`, `flake.lock`    | Environnement de développement reproductible         |
