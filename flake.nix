@@ -44,6 +44,7 @@
             bashInteractive
             cacert
             coreutils
+            curl
             dockerTools.fakeNss
             findutils
             gitMinimal

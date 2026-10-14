@@ -17,6 +17,7 @@ jobs:
     env:
       VAULT_ADDR: http://sati.macopla.home:8200
       BAO_ADDR: http://sati.macopla.home:8200
+      GIT_SSH_COMMAND: ssh -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/root/.ssh/known_hosts
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -36,4 +37,12 @@ jobs:
           export VAULT_TOKEN="$(echo "$SECRET_ID" | bao write -field=token auth/approle/login role_id="$ROLE_ID" secret_id=-)"
           packer init .
           packer validate -var packer_ip=mouse.macopla.home .
+          ansible-galaxy collection install -r requirements.yml
           packer build -force -var packer_ip=mouse.macopla.home .
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          curl -fsS -X POST -H "Content-Type: application/json" \
+            -d '{"title": "packer - ERREUR", "body": "Le build mensuel des templates a échoué, ils sont peut-être absents.", "tag": "infra-error"}' \
+            https://apprise.macopla.com/notify/apprise
