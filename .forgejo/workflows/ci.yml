@@ -7,7 +7,7 @@ name: Test
 jobs:
   pre-commit:
     name: Pre-commit
-    runs-on: docker
+    runs-on: podman-nix
     container:
       image: forge.macopla.com/homelab/packer/packer-ci:latest@sha256:3840505ea84e050476dd6149a5e6d15d539a810856b681697fd29a8687e9869a
       credentials:
