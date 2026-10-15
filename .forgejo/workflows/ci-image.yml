@@ -12,7 +12,7 @@ name: Build CI-Container
 jobs:
   build-packer-ci:
     name: Build Packer CI Container
-    runs-on: nix
+    runs-on: podman-nix
     env:
       NIX_CONFIG: "experimental-features = nix-command flakes"
     steps:
