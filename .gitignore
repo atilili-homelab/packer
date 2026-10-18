@@ -1,3 +1,12 @@
 .direnv/
 packer_cache/
 result
+
+# Filet de sécurité : les secrets passent par OpenBao, rien de ce type ne doit être commité
+.env
+*.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
