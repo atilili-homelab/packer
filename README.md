@@ -1,10 +1,30 @@
 # PACKER
 
+<!--toc:start-->
+
+- [Ce que fait le build](#ce-que-fait-le-build)
+- [Prérequis](#prérequis)
+- [Secrets](#secrets)
+- [Utilisation](#utilisation)
+- [Intégration continue](#intégration-continue)
+- [Structure](#structure)
+
+<!--toc:end-->
+
 Templates de VM **Debian 13 (Trixie)** prêts pour cloud-init, construits avec
 Packer sur mon cluster Proxmox VE de trois nœuds.
 
 Ces templates sont la première partie de mon homelab : OpenTofu les clone pour
 créer les VM, puis Ansible les configure plus finement.
+
+```mermaid
+flowchart LR
+    iso[ISO Debian 13] -->|preseed servi en HTTP| install[Installation automatique]
+    install -->|golden.yml| base[Collection homelab.base]
+    base -->|setup.sh| clean[Nettoyage et compaction]
+    clean --> tpl[Template Proxmox]
+    tpl -.->|cloné par| tofu[OpenTofu]
+```
 
 Le socle commun à toutes les VM (paquets de base, chrony, Docker) est déjà dans
 l'image. Il est posé pendant le build par les mêmes rôles Ansible que ceux qui
@@ -77,6 +97,29 @@ packer build -force .   # pour forcer la recréation des templates
 
 Les paramètres non secrets (URL de Proxmox, VMID, ressources, ISO, paquets) sont
 dans `debian-13.auto.pkrvars.hcl`.
+
+## Intégration continue
+
+La CI tourne sur Forgejo Actions, sur un runner sans root qui exécute ses jobs
+dans Podman. Les jobs s'exécutent dans une image construite par Nix depuis ce
+dépôt, pour que la CI et le poste de travail aient les mêmes versions de packer
+et d'ansible.
+
+| Workflow              | Déclencheur                                    | Ce qu'il fait                                                                 |
+| --------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ci.yml`              | push sur une branche autre que `main`          | gitleaks sur les commits de la branche, puis pre-commit sur tous les fichiers  |
+| `ci-image.yml`        | push sur `main` touchant le flake, ou manuel   | reconstruit l'image de CI et la pousse sur la forge                           |
+| `build-templates.yml` | le premier de chaque mois à 5 h, ou manuel     | reconstruit les trois templates, et notifie si le build échoue                |
+
+Trois points à noter :
+
+- `ci-image.yml` calcule l'empreinte du store Nix de l'image avant tout, puis
+  interroge le registre avec skopeo. Si cette empreinte y est déjà, le build est
+  sauté : une image identique n'est jamais reconstruite deux fois.
+- Le build mensuel s'authentifie auprès d'OpenBao par AppRole et échange ses
+  identifiants contre un token au début du job. Rien n'est écrit sur disque.
+- Un échec du build mensuel part en notification Apprise, parce qu'un template
+  absent ne se verrait qu'au moment où OpenTofu essaie de le cloner.
 
 ## Structure
 
