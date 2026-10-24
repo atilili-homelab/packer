@@ -9,7 +9,7 @@ jobs:
     name: Pre-commit
     runs-on: podman-nix
     container:
-      image: forge.macopla.com/homelab/packer/packer-ci:latest@sha256:3840505ea84e050476dd6149a5e6d15d539a810856b681697fd29a8687e9869a
+      image: forge.macopla.com/homelab/packer/packer-ci:latest@sha256:16e39ffa150f0184d32b09bfd396f6a1ca8691ae3177df6aa38d15461282634c
       credentials:
         username: ci-bot
         password: ${{ secrets.CI_PACKER_PULL_TOKEN }}
