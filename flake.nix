@@ -21,7 +21,7 @@
         gitleaks
         forgejo-runner
         ansible # utilisation de mes collections
-        openbao # connexion AppRole dans .envrc
+        openbao # connexion Openbao dans .envrc
       ];
   in {
     devShells = forAllSystems (pkgs: {

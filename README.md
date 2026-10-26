@@ -66,8 +66,8 @@ chaque mois, pour que les VM créées partent d'un système à jour.
 ## Prérequis
 
 - **Nix** avec les flakes activés, et **direnv**.
-- **rbw** (client Bitwarden CLI) déverrouillé : il fournit les identifiants
-  AppRole d'OpenBao.
+- **rbw** (client Bitwarden CLI) déverrouillé : il fournit le mot de passe
+  OpenBao de l'utilisateur `yoann`, si aucune session n'est ouverte.
 - Un accès réseau à **OpenBao** et à l'**API Proxmox**.
 - Un accès en lecture au dépôt de la collection Ansible, par clé SSH.
 
@@ -81,9 +81,11 @@ Aucun secret n'est stocké dans ce dépôt, ni sur disque.
 
 - Le **token API Proxmox** et le **mot de passe temporaire du build** sont lus
   dans OpenBao grâce à la fonction `vault()` de Packer.
-- En local, à l'entrée dans le dossier, `.envrc` se connecte à OpenBao avec
-  l'AppRole `packer` (identifiants lus dans Bitwarden via rbw) et exporte un
-  token valable une heure, limité à la lecture de `secret/data/packer/*`.
+- En local, à l'entrée dans le dossier, `.envrc` réutilise la session OpenBao
+  de `yoann` (`~/.vault-token`, partagée avec les dépôts opentofu et ansible),
+  ou l'ouvre avec le mot de passe lu dans Bitwarden via rbw. Il en dérive un
+  token enfant valable une heure, limité à `packer-policy` (lecture de
+  `secret/data/packer/*`), révoqué en même temps que la session.
 
 ## Utilisation
 
