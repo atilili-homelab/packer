@@ -1,6 +1,6 @@
 #=== Proxmox Packer Template Variables ===
 proxmox_url      = "http://10.86.30.10:8006/api2/json"
-proxmox_username = "root@pam!packer"
+proxmox_username = "packer@pve!packer"
 skip_tls_verify  = true
 
 #=== Template Configuration ===

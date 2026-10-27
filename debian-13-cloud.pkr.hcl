@@ -14,7 +14,7 @@ packer {
 
 # ── Secrets lus dans OpenBao (VAULT_ADDR et VAULT_TOKEN fournis par .envrc) ──
 local "proxmox_token" {
-  expression = vault("/secret/data/packer/proxmox", "token")
+  expression = vault("/secret/data/packer/proxmox-token", "token")
   sensitive  = true
 }
 
