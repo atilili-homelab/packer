@@ -15,8 +15,8 @@ jobs:
         username: ci-bot
         password: ${{ secrets.CI_PACKER_PULL_TOKEN }}
     env:
-      VAULT_ADDR: http://sati.macopla.home:8200
-      BAO_ADDR: http://sati.macopla.home:8200
+      VAULT_ADDR: https://bao.macopla.com:8200
+      BAO_ADDR: https://bao.macopla.com:8200
       GIT_SSH_COMMAND: ssh -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/root/.ssh/known_hosts
     steps:
       - name: Checkout
