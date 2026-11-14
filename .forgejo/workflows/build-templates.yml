@@ -10,7 +10,7 @@ jobs:
     name: Build Proxmox templates
     runs-on: podman-nix
     container:
-      image: forge.macopla.com/homelab/packer/packer-ci:latest@sha256:4a1dd455dfcf0e96cb00ae03182787b4c5b43508bf482c2629cadc20798404d7
+      image: forge.macopla.com/homelab/packer/packer-ci:latest@sha256:4df9134b9a188299f6373ad96bc5cc799ba97e3d8e13e9e74bd0132bd62097d5
       credentials:
         username: ci-bot
         password: ${{ secrets.CI_PACKER_PULL_TOKEN }}
